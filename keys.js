@@ -1,0 +1,2 @@
+const jwtkey="rurgt27yr2983r1u3brhbefwveru283h"
+module.exports=jwtkey
