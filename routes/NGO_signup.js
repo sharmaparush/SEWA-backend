@@ -6,7 +6,7 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 const jwtkey=require('../keys')
 const User=require('../models/NGO_user')
-router.post('/',bodyParser,[
+router.post('/',(bodyParser.urlencoded({extended:true})),(bodyParser.json()),[
 body('name','Enter a valid name').isLength({min:3}),
 body('email','Enter a valid email').isEmail(),
 body('password','Password must be atleast 5 characters').isLength({min:5})
