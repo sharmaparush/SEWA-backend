@@ -2,7 +2,7 @@ const express=require('express')
 const router=express.Router()
 const Data=require('../models/raising')
 const hotel=require('../models/hotel_user')
-router.get('/',(req,res)=>{
+router.post('/',(req,res)=>{
     
         //Data.collection.createIndex({"DateTime":1},{expireAfterSeconds:req.body.left*60})
           var d1=new Date();

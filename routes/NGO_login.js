@@ -5,7 +5,7 @@ var bcrypt = require('bcryptjs');
 const User=require('../models/NGO_user');
 const {body,validationResult}=require('express-validator')
 const jwtkey=require('../keys')
-router.get('/',[
+router.post('/',[
     body('email','Enter a valid email').isEmail(),
 body('password','Password must be atleast 5 characters').isLength({min:5})
 ],(req,res)=>{

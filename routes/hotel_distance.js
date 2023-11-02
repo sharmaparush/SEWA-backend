@@ -2,7 +2,7 @@ const express=require('express')
 const router=express.Router()
 const raising=require('../models/raising')
 const hotel=require('../models/hotel_user')
-router.get('/', async(req,res)=>{
+router.post('/', async(req,res)=>{
        let hoteldata = await hotel.findOne({email:req.body.email});
         let data =await raising.find({});
 
