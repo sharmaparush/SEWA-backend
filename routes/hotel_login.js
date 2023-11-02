@@ -27,12 +27,12 @@ body('password','Password must be atleast 5 characters').isLength({min:5})
               
         }
         else{
-            return res.status(400).json({errors:{msg:"Invalid credentials"}})
+            return res.status(400).json("Invalid credentials")
             }
     });
    }
    else{
-   return res.status(400).json({errors:{msg:"Invalid credentials"}})
+   return res.status(400).json("Invalid credentials")
    }
    
 })})
