@@ -9,6 +9,7 @@ router.post('/',[
     body('email','Enter a valid email').isEmail(),
 body('password','Password must be atleast 5 characters').isLength({min:5})
 ],(req,res)=>{
+    console.log(req.body)
     const errors=validationResult(req)
     if(!errors.isEmpty()){
         return res.status(400).json({errors:errors.array()})

@@ -1,16 +1,15 @@
+var jwt = require('jsonwebtoken')
 const express=require('express')
-const {body,validationResult}=require('express-validator')
-const bodyParser=require('body-parser')
 const router=express.Router()
 var bcrypt = require('bcryptjs');
-var jwt = require('jsonwebtoken');
-const jwtkey=require('../keys')
 const User=require('../models/NGO_user')
-router.post('/',(bodyParser.urlencoded({extended:true})),(bodyParser.json()),[
+const {body,validationResult}=require('express-validator')
+const jwtkey=require('../keys')
+
+router.post('/',[
 body('name','Enter a valid name').isLength({min:3}),
 body('email','Enter a valid email').isEmail(),
 body('password','Password must be atleast 5 characters').isLength({min:5})
-
 
 ], (req,res)=>{
     console.log(req.body)
