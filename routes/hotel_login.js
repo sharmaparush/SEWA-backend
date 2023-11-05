@@ -22,9 +22,7 @@ body('password','Password must be atleast 5 characters').isLength({min:5})
           const tok=  jwt.sign({
                 data: checker._id,
               }, jwtkey, { expiresIn: '1h' });
-              res.user={"id":checker._id}
-              res.cookie("jwt",tok);
-              return res.status(200).json({msg:"Sucessfully logged in"})
+              return res.send({"jwt":JSON.stringify(tok),"id":checker._id})
               
         }
         else{
