@@ -6,6 +6,7 @@ router.post('/',(req,res)=>{
     
         //Data.collection.createIndex({"DateTime":1},{expireAfterSeconds:req.body.left*60})
           var d1=new Date();
+          d1.setHours(d1.getHours() + req.body.left);
           console.log(d1);
           //d1.setMinutes(d1.getMinutes()+req.body.left*60)
           var w=req.body
