@@ -21,7 +21,7 @@ router.post('/',async(req,res)=>{
           var d1=new Date()
           
           
-          var t=req.cookies.pid
+          var t=req.body.pid
         //   var ISTOffset = 330;   // IST offset UTC +5:30 
         //   offset=ISTOffset*60*1000
         //   d1 = new Date(d1.getTime() + offset);
