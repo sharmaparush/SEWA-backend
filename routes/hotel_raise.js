@@ -20,22 +20,22 @@ router.post('/',async(req,res)=>{
         //Data.collection.createIndex({"DateTime":1},{expireAfterSeconds:req.body.left*60})
           var d1=new Date()
           
-          var mai
-          await hotel.findById(req.body.pid).then((got)=>{
-            mai=got.email
-          })
+          
+          var t=req.cookies.pid
         //   var ISTOffset = 330;   // IST offset UTC +5:30 
         //   offset=ISTOffset*60*1000
         //   d1 = new Date(d1.getTime() + offset);
         //   console.log(d1)
+        //console.log(req.body.)
           d1.setHours(d1.getHours() + req.body.left);
           //console.log(d1);
           //d1.setMinutes(d1.getMinutes()+req.body.left*60)
           var w=req.body
           w.status="pending"
+          w.email=t
           w.expiryTime=d1
          Data.create(w).then((check)=>{
-            hotel.findOne({email:mai})
+            hotel.findOne({"email":t})
             .then((hoteluser)=>{
                 
                 hoteluser.raising.push(check);

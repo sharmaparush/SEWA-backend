@@ -23,7 +23,8 @@ body('password','Password must be atleast 5 characters').isLength({min:5})
                 data: checker._id,
               }, jwtkey, { expiresIn: '1h' });
               res.cookie("jwt",tok)
-              return res.send({"jwt":tok,"id":checker._id})
+              res.cookie("pid",req.body.email)
+              return res.send({"jwt":tok,"pid":req.body.email})
               
         }
         else{

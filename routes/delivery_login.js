@@ -21,7 +21,7 @@ body('password','Password must be atleast 5 characters').isLength({min:5})
           const tok=  jwt.sign({
                 data: checker._id,
               }, jwtkey, { expiresIn: '1h' });
-              return res.send({"jwt":tok,"id":checker._id})
+              return res.send({"jwt":tok,"id":req.body.email})
               
         }
         else{
