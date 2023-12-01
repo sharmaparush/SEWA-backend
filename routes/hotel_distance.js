@@ -213,19 +213,19 @@ router.post('/', async(req,res)=>{
                 console.log(hot.items)
                 await raising.findByIdAndUpdate(i.id,{items:hot.items})
                 let u=await raising.findById(i._id)
-                await hotel.findOne({email:hot.email}).then((ter)=>{
-                    let raisingA=ter.raising
-                    for(let k=0;k<raising.length;k++){
-                      console.log(raisingA[k])
-                      if(raisingA[k]===i.id){
-                           raisingA.set(k,u)
-                           ter.raising=raisingA
-                           console.log(ter.raising)
-                           ter.save();
-                      }
-                    }
+                // await hotel.findOne({email:hot.email}).then((ter)=>{
+                //     let raisingA=ter.raising
+                //     for(let k=0;k<raising.length;k++){
+                //       console.log(raisingA[k])
+                //       if(raisingA[k]===i.id){
+                //            raisingA.set(k,u)
+                //            ter.raising=raisingA
+                //            console.log(ter.raising)
+                //            ter.save();
+                //       }
+                //     }
 
-                })
+                // })
               }
             }
           })
