@@ -4,7 +4,7 @@ const Mailgen = require('mailgen');
 const router=express.Router()
 const Data=require('../models/raising')
 const hotel=require('../models/hotel_user')
-router.post('/',(req,res)=>{
+router.post('/',async(req,res)=>{
     
 
    
@@ -20,7 +20,10 @@ router.post('/',(req,res)=>{
         //Data.collection.createIndex({"DateTime":1},{expireAfterSeconds:req.body.left*60})
           var d1=new Date()
           
-    
+          var mai
+          await hotel.findById(req.body.pid).then((got)=>{
+            mai=got.email
+          })
         //   var ISTOffset = 330;   // IST offset UTC +5:30 
         //   offset=ISTOffset*60*1000
         //   d1 = new Date(d1.getTime() + offset);
@@ -32,7 +35,7 @@ router.post('/',(req,res)=>{
           w.status="pending"
           w.expiryTime=d1
          Data.create(w).then((check)=>{
-            hotel.findOne({email:req.body.email})
+            hotel.findOne({email:mai})
             .then((hoteluser)=>{
                 
                 hoteluser.raising.push(check);

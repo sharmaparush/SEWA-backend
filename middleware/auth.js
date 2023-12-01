@@ -7,6 +7,12 @@ const auth=(req,res,next)=>{
     next();
   }
   else{
+  if(req.body.jwt){
+    const check=jwt.verify(req.cookies.jwt,jwtkey);
+    req.user={"id":check.data}
+    next();
+  }
+  else{
   return res.status(401).json({errors:{msg:"Unauthorised access login first"}})
-}}
+}}}
 module.exports= auth;
