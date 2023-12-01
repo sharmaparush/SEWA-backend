@@ -5,8 +5,10 @@ const router=express.Router()
 const raising=require('../models/raising')
 const hotel=require('../models/hotel_user')
 const NGO=require('../models/NGO_user')
-
-
+const checkIfKeyExist = (objectName, keyName) => {
+  let keyExist = Object.keys(objectName).some(key => key === keyName);
+  return keyExist;
+};
 async function helper(objects,map,sc,a,index,arr,score) {
   if(index>=Array.from(map.keys()).length) return
    let c=0;
@@ -20,7 +22,7 @@ async function helper(objects,map,sc,a,index,arr,score) {
    for( let i of fooddata){
     for (key in i){
     let item=key
-    if(Object.hasOwn(objects, item)&&objects[item]!==0){
+    if(checkIfKeyExist(objects, item)&&objects[item]!==0){
            
            r=true
            a.push({"id":foodid,"item":key,"quantity":Math.min(objects[item],i[key]),"score":sc+Array.from(map.keys())[index]})
