@@ -3,12 +3,11 @@ var moment = require('moment')
 const axios=require('axios')
 const router=express.Router()
 const raising=require('../models/raising')
-const exp=require('../models/exp')
 const hotel=require('../models/hotel_user')
 const NGO=require('../models/NGO_user')
-let score=1000000;
 
-async function helper(objects,map,sc,a,index,arr) {
+
+async function helper(objects,map,sc,a,index,arr,score) {
   if(index>=Array.from(map.keys()).length) return
    let c=0;
    let copy={}
@@ -19,12 +18,10 @@ async function helper(objects,map,sc,a,index,arr) {
    let r=false
    let sa=a.length
    fooddata.forEach(async(i)=>{
-    console.log(i)
     for (key in i){
     let item=key
-    if(Object.hasOwn(objects, item)&&objects[item]>0){
-           //console.log(objects[item])
-           //console.log(item)
+    if(Object.hasOwn(objects, item)&&objects[item]!==0){
+           
            r=true
            a.push({"id":foodid,"item":key,"quantity":Math.min(objects[item],i[key]),"score":sc+Array.from(map.keys())[index]})
            objects[item]=objects[item]-i[key]
@@ -36,30 +33,31 @@ async function helper(objects,map,sc,a,index,arr) {
     if(r===true&&c===Object.keys(objects).length){
       if(sc+Array.from(map.keys())[index]<score) {
        score=sc+Array.from(map.keys())[index]
-       console.log(a)
        Object.assign(arr,a);
        return
       }
+    
  
   }
   c=0
     }
    })
    if(r===true){
-   await helper(objects,map,sc+Array.from(map.keys())[index],a,index+1,arr)
+   await helper(objects,map,sc+Array.from(map.keys())[index],a,index+1,arr,score)
    }
    if(r===true){
-     let diff=a.length-r
+     let diff=a.length-sa
      for(let j=0;j<diff;j++){
       a.pop()
      }
    }
-   await helper(copy,map,sc,a,index+1,arr)
+   await helper(copy,map,sc,a,index+1,arr,score)
 
 
 }
 router.post('/', async(req,res)=>{
   let arr=[]
+  let score=1000000;
        let NGOdata = await NGO.findOne({email:req.body.email});
        await raising.find({}).then(async(data)=>{
         //let t1="";
@@ -76,7 +74,7 @@ router.post('/', async(req,res)=>{
                   //     "status": shift.status
                   // });
                   // t1 = newExpDoc._id;
-                  await hotel.findOne({"email":req.body.email}).then((hoteldata)=>{
+                  await hotel.findOne({"email":req.body.email}).then(async (hoteldata)=>{
                     
                    let array=hoteldata.raising
                    array.forEach(async(j,index)=>{
@@ -96,22 +94,8 @@ router.post('/', async(req,res)=>{
       // Handle the error as needed
   }}})})
               
-            //   console.log("Entries in 'raising' collection after modifications:");
-            // const raisingEntries = await raising.find({});
-            // console.log(raisingEntries);
-
-            // // Print entries in 'exp' collection
-            // console.log("\nEntries in 'exp' collection after modifications:");
-            // const expEntries = await exp.find({});
-            // console.log(expEntries);
-
-          
-
-      
       
                      
-                    
-           
             //let destination=NGOdata.address
             
             let destination="JIIT,Sec-62"
@@ -126,7 +110,7 @@ router.post('/', async(req,res)=>{
             }
           }
             await raising.find({}).then(async(dat)=>{
-            
+           
         for (const i of dat) {
             let src = await hotel.findOne({ email: i.email });
             source = "Dinanagar,Punjab";
@@ -134,23 +118,27 @@ router.post('/', async(req,res)=>{
             if(i.status==="pending"&&await helper1(i.email)){
             try {
                 let d = await axios.get(`https://api-v2.distancematrix.ai/maps/api/distancematrix/json?origins=${source}&destinations=${destination}&key=QddmHYTMDVhDDmA6oMKO4JTA1cRZKBRg1UspHavOxWiEyUPAtikUDIleKcW3KVUi`);
+                
                 let distance = d.data.rows[0].elements[0].distance.text;
                 let distanceTime = d.data.rows[0].elements[0].duration.text;
-                map1.set(src._id, { "distance": distance, "Time": distanceTime });
+                map1.set(src._id.toString(), { "distance": distance, "Time": distanceTime });
       
                 let obj=src.raising
                 obj.forEach(async(o)=>{
                   if(o.status!=="expired"){
                   var secondsDiff = (o.expiryTime-new Date())/1000
-                  secondsDiff/=60
-                  console.log(secondsDiff);
+                  
+                  
+                   var e=parseInt(distance)*parseInt(secondsDiff)/10000
                    
-                   map2.set(parseInt(distance)*parseInt(secondsDiff)/10000,o._id)
+                   if(e>=0){
+                    
+                   map2.set(e,o._id)}
                   }
                 })
-                console.log(map1);
+                //console.log(map1)
                 map2 = new Map([...map2].sort((a, b) => String(a[0]).localeCompare(b[0])))
-                console.log(map2);
+                //console.log(map2)
               } catch (error) {
                 console.error("Error processing document:", error);
                 // Handle the error as needed
@@ -160,11 +148,60 @@ router.post('/', async(req,res)=>{
 
         
       })
-      console.log(req.body.required)
-      let r=await helper(req.body.required,map2,0,[],0,arr)
-      console.log("outer")
-      console.log(arr)
-      return res.json("done")
+      let front=[]
+      async function helplast(){
+       
+        for(let i of arr){
+          
+          await raising.findById(i.id).then(async(raised)=>{
+            //console.log(raised)
+           
+            await hotel.findOne({"email":raised.email}).then((hoteli)=>{
+              
+              var pot=(map1.get(hoteli._id.toString()))
+              var give={
+                 "email":raised.email,
+                 "name":hoteli.name,
+                 "address":hoteli.address,
+                 "item":i.item,
+                 "quantity":i.quantity,
+                 "time": pot["Time"],
+                 "distance": pot["distance"]
+  
+              }
+              //console.log(give)
+              front.push(give)
+              //console.log(front.length)
+            })
+              
+         })
+  
+         }
+
+         
+         
+        
+      }
+      
+      await helper(req.body.required,map2,0,[],0,arr,score).then(async()=>{
+        console.log(arr)
+        await helplast()
+        front.sort((a,b)=>{
+          var tr=parseInt(a.time)
+          var rt=parseInt(b.time)
+          return tr-rt
+        })
+        return res.json(front)
+        
+})
+      
+       
+      
+       
+        
+     
+      
+      
       })
 
       
