@@ -1,8 +1,8 @@
 var jwt = require('jsonwebtoken');
 const jwtkey=require('../keys');
 const auth=(req,res,next)=>{
-  if(req.cookies.jwt){
-    const check=jwt.verify(req.cookies.jwt,jwtkey);
+  if(req.body.jwt){
+    const check=jwt.verify(req.body.jwt,jwtkey);
     req.user={"id":check.data}
     next();
   }
