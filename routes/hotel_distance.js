@@ -17,7 +17,7 @@ async function helper(objects,map,sc,a,index,arr,score) {
    fooddata=fooddata.items
    let r=false
    let sa=a.length
-   fooddata.forEach(async(i)=>{
+   for( let i of fooddata){
     for (key in i){
     let item=key
     if(Object.hasOwn(objects, item)&&objects[item]!==0){
@@ -41,7 +41,7 @@ async function helper(objects,map,sc,a,index,arr,score) {
   }
   c=0
     }
-   })
+   }
    if(r===true){
    await helper(objects,map,sc+Array.from(map.keys())[index],a,index+1,arr,score)
    }
@@ -61,7 +61,7 @@ router.post('/', async(req,res)=>{
        let NGOdata = await NGO.findOne({email:req.body.email});
        await raising.find({}).then(async(data)=>{
         //let t1="";
-        const t=await data.forEach(async (i) => {
+          for(let i of data) {
           if (i.expiryTime <= new Date()) {
               try {
                   let hoteldata = await hotel.findOne({ email: i.email });
@@ -92,7 +92,7 @@ router.post('/', async(req,res)=>{
      catch (error) {
       console.error("Error processing document:", error);
       // Handle the error as needed
-  }}})})
+  }}}})
               
       
                      
@@ -111,7 +111,7 @@ router.post('/', async(req,res)=>{
           }
             await raising.find({}).then(async(dat)=>{
            
-        for (const i of dat) {
+        for (let i of dat) {
             let src = await hotel.findOne({ email: i.email });
             source = "Dinanagar,Punjab";
            
@@ -124,7 +124,7 @@ router.post('/', async(req,res)=>{
                 map1.set(src._id.toString(), { "distance": distance, "Time": distanceTime });
       
                 let obj=src.raising
-                obj.forEach(async(o)=>{
+                for( o of obj){
                   if(o.status!=="expired"){
                   var secondsDiff = (o.expiryTime-new Date())/1000
                   
@@ -135,7 +135,7 @@ router.post('/', async(req,res)=>{
                     
                    map2.set(e,o._id)}
                   }
-                })
+                }
                 //console.log(map1)
                 map2 = new Map([...map2].sort((a, b) => String(a[0]).localeCompare(b[0])))
                 //console.log(map2)
