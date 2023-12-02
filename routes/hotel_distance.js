@@ -10,7 +10,8 @@ const checkIfKeyExist = (objectName, keyName) => {
   let keyExist = Object.keys(objectName).some(key => key === keyName);
   return keyExist;
 };
-async function helper(objects,map,sc,a,index,arr,score,temp) {
+let stemp=[]
+async function helper(objects,map,sc,a,index,arr,score) {
   if(index>=Array.from(map.keys()).length) return
    let c=0;
    let copy={}
@@ -29,13 +30,19 @@ async function helper(objects,map,sc,a,index,arr,score,temp) {
            a.push({"id":foodid,"item":key,"quantity":Math.min(objects[item],i[key]),"score":sc+Array.from(map.keys())[index]})
            objects[item]=objects[item]-i[key]
            if(objects[item]<0) objects[item]=0
-           if(a.length>=temp.length){
-            for(let lo of a){
-              temp.push(lo)
-            }
+           if(a.length>=stemp.length){
+            stemp=[]
             
-            console.log(temp)
-           }
+
+            for(let lo of a){
+              stemp.push(lo)
+            }
+            console.log("hii")
+            console.log(stemp)
+            console.log("byee")
+           
+          }
+            
     }
     for (const key in objects) {
       if(objects[key]===0) ++c;
@@ -53,7 +60,7 @@ async function helper(objects,map,sc,a,index,arr,score,temp) {
     }
    }
    if(r===true){
-   await helper(objects,map,sc+Array.from(map.keys())[index],a,index+1,arr,score,temp)
+   await helper(objects,map,sc+Array.from(map.keys())[index],a,index+1,arr,score)
    }
    if(r===true){
      let diff=a.length-sa
@@ -61,7 +68,7 @@ async function helper(objects,map,sc,a,index,arr,score,temp) {
       a.pop()
      }
    }
-   await helper(copy,map,sc,a,index+1,arr,score,temp)
+   await helper(copy,map,sc,a,index+1,arr,score)
 
 
 }
@@ -206,8 +213,8 @@ router.post('/', async(req,res)=>{
          
         
       }
-      var stemp=[]
-      await helper(req.body.required,map2,0,[],0,arr,score,stemp).then(async()=>{
+      stemp=[]
+      await helper(req.body.required,map2,0,[],0,arr,score).then(async()=>{
         console.log(stemp)
         if(arr.length===0){
           arr=stemp
@@ -217,7 +224,7 @@ router.post('/', async(req,res)=>{
           let stored={}
           await raising.findById(i.id).then(async (hot)=>{
             stored.fromemail=hot.email
-            stored.toemail=req.body.email
+            stored.toemail=t
             stored.raisedId=i.id
             var items1=hot.items
             for(let j of items1){
@@ -254,6 +261,7 @@ router.post('/', async(req,res)=>{
           var rt=parseInt(b.time)
           return tr-rt
         })
+        
         return res.json(front)
         
 })
