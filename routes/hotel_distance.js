@@ -5,11 +5,12 @@ const router=express.Router()
 const raising=require('../models/raising')
 const hotel=require('../models/hotel_user')
 const NGO=require('../models/NGO_user')
+const donated=require('../models/donated')
 const checkIfKeyExist = (objectName, keyName) => {
   let keyExist = Object.keys(objectName).some(key => key === keyName);
   return keyExist;
 };
-async function helper(objects,map,sc,a,index,arr,score) {
+async function helper(objects,map,sc,a,index,arr,score,temp) {
   if(index>=Array.from(map.keys()).length) return
    let c=0;
    let copy={}
@@ -22,12 +23,19 @@ async function helper(objects,map,sc,a,index,arr,score) {
    for( let i of fooddata){
     for (key in i){
     let item=key
-    if(checkIfKeyExist(objects, item)&&objects[item]!==0){
+    if(checkIfKeyExist(objects, item)&&objects[item]!==0&&i[key]!==0){
            
            r=true
            a.push({"id":foodid,"item":key,"quantity":Math.min(objects[item],i[key]),"score":sc+Array.from(map.keys())[index]})
            objects[item]=objects[item]-i[key]
            if(objects[item]<0) objects[item]=0
+           if(a.length>=temp.length){
+            for(let lo of a){
+              temp.push(lo)
+            }
+            
+            console.log(temp)
+           }
     }
     for (const key in objects) {
       if(objects[key]===0) ++c;
@@ -45,7 +53,7 @@ async function helper(objects,map,sc,a,index,arr,score) {
     }
    }
    if(r===true){
-   await helper(objects,map,sc+Array.from(map.keys())[index],a,index+1,arr,score)
+   await helper(objects,map,sc+Array.from(map.keys())[index],a,index+1,arr,score,temp)
    }
    if(r===true){
      let diff=a.length-sa
@@ -53,12 +61,13 @@ async function helper(objects,map,sc,a,index,arr,score) {
       a.pop()
      }
    }
-   await helper(copy,map,sc,a,index+1,arr,score)
+   await helper(copy,map,sc,a,index+1,arr,score,temp)
 
 
 }
 router.post('/', async(req,res)=>{
   let arr=[]
+  let temp=[]
   let score=1000000;
    let t
    if(req.cookies.pid){
@@ -197,35 +206,45 @@ router.post('/', async(req,res)=>{
          
         
       }
-      
-      await helper(req.body.required,map2,0,[],0,arr,score).then(async()=>{
-        console.log(arr)
+      var stemp=[]
+      await helper(req.body.required,map2,0,[],0,arr,score,stemp).then(async()=>{
+        console.log(stemp)
+        if(arr.length===0){
+          arr=stemp
+        }
         await helplast()
         for(let i of arr){
+          let stored={}
           await raising.findById(i.id).then(async (hot)=>{
+            stored.fromemail=hot.email
+            stored.toemail=req.body.email
+            stored.raisedId=i.id
             var items1=hot.items
             for(let j of items1){
               if(checkIfKeyExist(j,i.item)&&j[i.item]>0){
-                
+                stored.item=i.item
+                stored.quantity=i.quantity
+                donated.create(stored)
                 j[i.item]-=i.quantity
                 
                 hot.items=items1
                 console.log(hot.items)
                 await raising.findByIdAndUpdate(i.id,{items:hot.items})
-                let u=await raising.findById(i._id)
-                // await hotel.findOne({email:hot.email}).then((ter)=>{
-                //     let raisingA=ter.raising
-                //     for(let k=0;k<raising.length;k++){
-                //       console.log(raisingA[k])
-                //       if(raisingA[k]===i.id){
-                //            raisingA.set(k,u)
-                //            ter.raising=raisingA
-                //            console.log(ter.raising)
-                //            ter.save();
-                //       }
-                //     }
+                await raising.findById(i.id).then(async(io)=>{
+                
+                await hotel.findOne({email:hot.email}).then((ter)=>{
+                    let raisingA=ter.raising
+                    let count=0
+                    raisingA.forEach(async(k)=>{
+                      
+                        if(k._id.toString()===i.id.toString()){
+                          raisingA.set(count,io)
+                          await hotel.findByIdAndUpdate(ter._id,{raising:raisingA})
+                        }
+                        ++count;
+                    })
 
-                // })
+                })})
               }
             }
           })
